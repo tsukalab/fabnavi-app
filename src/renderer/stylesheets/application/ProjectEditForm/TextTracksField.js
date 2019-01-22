@@ -9,14 +9,14 @@ export const EditBanner = styled.p`
     margin-bottom: 10px;
 `;
 
-export const StyledCaptionsField = styled.div`
+export const StyledTextTracksField = styled.div`
     margin-left: 20px;
     padding-right: 8px;
     overflow-y: scroll;
     height: 433px;
 `;
 
-export const StyledCaptionFieldHeader = styled.div`
+export const StyledTextTrackFieldHeader = styled.div`
     margin-left: 100px;
     padding-bottom: 10px;
 `;
@@ -34,7 +34,7 @@ const SpanProperty = props => {
     }
 };
 
-export const CaptionFieldSpan = styled.span`
+export const TextTrackFieldSpan = styled.span`
     display: inline-block;
     margin: 0;
     font-weight: 500;
@@ -59,24 +59,24 @@ export const CaptionFieldSpan = styled.span`
     ${props => props.text && props.contentType && SpanProperty(props)};
 `;
 
-export const CaptionFieldWrapper = styled.div`
+export const TextTrackFieldWrapper = styled.div`
     opacity: ${props => props.figureWillBeDeleted ? '0.3' : '1.0'};
     pointer-events: ${props => props.figureWillBeDeleted ? 'none' : 'auto'};
 `;
 
-export const CaptionFieldIndex = styled.div`
+export const TextTrackFieldIndex = styled.div`
     margin-bottom: -32px;
     margin-top: 10px;
     text-transform: capitalize;
 `;
 
-export const CaptionFieldList = styled.ul`
+export const TextTrackFieldList = styled.ul`
     margin: 0;
     padding: 10px 0 0 0;
     border-top: 1px solid #CCC;
 `
 
-export const AddCaptionButton = styled.button`
+export const AddTextTrackButton = styled.button`
     margin-left: 100px;
     margin-bottom: 15px;
     font-size: 12px;

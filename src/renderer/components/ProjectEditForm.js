@@ -8,9 +8,9 @@ import { debounce } from 'throttle-debounce';
 import { updateProject } from '../actions/manager';
 
 import Player from './Player';
-import CaptionsField from './ProjectEditForm/CaptionsField';
+import TextTracksField from './ProjectEditForm/TextTracksField';
 
-import { EditPage, PageTitle, EditCaption, InputTitle, InputPrivate, DescriptionFieldWrapper, DescriptionField, SaveButton, EditTarget } from '../stylesheets/application/ProjectEditForm';
+import { EditPage, PageTitle, EditTextTrack, InputTitle, InputPrivate, DescriptionFieldWrapper, DescriptionField, SaveButton, EditTarget } from '../stylesheets/application/ProjectEditForm';
 
 const debug = Debug('fabnavi:jsx:ProjectEditForm');
 
@@ -23,6 +23,8 @@ export class ProjectEditForm extends React.Component {
             const figures = this.state.figures.map(figure => {
                 const captions = figure.captions.filter(caption => caption.text && !!caption.text.trim())
                 figure.captions = captions;
+                const chapters = figure.chapters.filter(chapter => chapter.name && !!chapter.name.trim())
+                figure.chapters = chapters;
                 return figure;
             })
             this.props.updateProject(
@@ -47,9 +49,9 @@ export class ProjectEditForm extends React.Component {
             this.setState({ description: e.target.value });
         };
 
-        this.changeCaptions = debounce(500, this.changeCaptions);
+        this.changeTextTracks = debounce(500, this.changeTextTracks);
 
-        this.onAddCaptionButtonClick = e => {
+        this.onAddTextTrackButtonClick = e => {
             e.preventDefault();
             const index = parseInt(e.target.dataset.index, 10);
             if(!this.state.figures) return;
@@ -58,13 +60,22 @@ export class ProjectEditForm extends React.Component {
                 figures: this.state.figures
                     .sort((a, b) => a.position - b.position)
                     .map((figure, i) => {
-                        if(i !== index) return figure;
-                        figure.captions.push({
-                            id: null,
-                            start_sec: currentTime,
-                            end_sec: currentTime,
-                            text: ''
-                        });
+                        if (i !== index) return figure;
+                        if (e.target.dataset.kind === 'caption') {
+                            figure.captions.push({
+                                id: null,
+                                start_sec: currentTime,
+                                end_sec: currentTime,
+                                text: ''
+                            });
+                        } else if (e.target.dataset.kind === 'chapter') {
+                            figure.chapters.push({
+                                id: null,
+                                start_sec: currentTime,
+                                end_sec: currentTime,
+                                name: ''
+                            });
+                        }
                         return figure;
                     })
             });
@@ -87,28 +98,40 @@ export class ProjectEditForm extends React.Component {
             description: '',
             private: false,
             figures: [],
-            captions: []
+            captions: [],
+            chapters: []
         };
     }
 
-    handlerCaptionsChange(e) {
-        this.changeCaptions(e.nativeEvent);
+    handlerTextTracksChange(e) {
+        this.changeTextTracks(e.nativeEvent);
     }
 
-    changeCaptions(e) {
+    changeTextTracks(e) {
         const li = e.target.parentNode;
         const figureIndex = parseInt(li.dataset.figureIndex, 10);
-        const captionIndex = parseInt(li.dataset.index, 10);
+        const textTrackIndex = parseInt(li.dataset.index, 10);
         const name = e.target.name;
         const figures = this.state.figures.map((figure, i) => {
-            if(i !== figureIndex) return figure;
-            const caption = figure.captions[captionIndex];
-            if(name === 'text') {
-                caption[name] = e.target.value;
-            } else if(name === '_destroy') {
-                caption[name] = e.target.checked;
-            } else {
-                caption[name] = isNaN(e.target.valueAsNumber) ? 0 : parseInt(e.target.valueAsNumber, 10) / 1000;
+            if (i !== figureIndex) return figure;
+            if (e.target.dataset.kind === 'caption') {
+                const caption = figure.captions[textTrackIndex];
+                if (name === 'text') {
+                    caption[name] = e.target.value;
+                } else if (name === '_destroy') {
+                    caption[name] = e.target.checked;
+                } else {
+                    caption[name] = isNaN(e.target.valueAsNumber) ? 0 : parseInt(e.target.valueAsNumber, 10) / 1000;
+                }
+            } else if (e.target.dataset.kind === 'chapter') {
+                const chapter = figure.chapters[textTrackIndex];
+                if (name === 'text') {
+                    chapter['name'] = e.target.value;
+                } else if (name === '_destroy') {
+                    chapter[name] = e.target.checked;
+                } else {
+                    chapter[name] = isNaN(e.target.valueAsNumber) ? 0 : parseInt(e.target.valueAsNumber, 10) / 1000;
+                }
             }
             return figure;
         });
@@ -161,7 +184,8 @@ export class ProjectEditForm extends React.Component {
                         return figure;
                     })
                     .sort((a, b) => a.position - b.position),
-                captions: props.project.content[0].figure.captions.sort((a, b) => (a.start_sec - b.start_sec))
+                captions: props.project.content[0].figure.captions.sort((a, b) => (a.start_sec - b.start_sec)),
+                chapters: props.project.content[0].figure.chapters.sort((a, b) => (a.start_sec - b.start_sec))
             });
         }
     }
@@ -207,7 +231,7 @@ export class ProjectEditForm extends React.Component {
                                 </div>
                             </div>
 
-                            <EditCaption>
+                            <EditTextTrack>
                                 <Player
                                     project={this.state.project}
                                     size="small"
@@ -216,14 +240,22 @@ export class ProjectEditForm extends React.Component {
                                     handleThumbanailOrderChange={this.handleThumbanailOrderChange.bind(this)}
                                     ref={instance => (this.player = instance)}
                                 />
-                                <CaptionsField
+                                <TextTracksField
+                                    kind={"caption"}
                                     figures={this.state.figures}
                                     contentType={project.content[0].type === 'Figure::Frame' ? 'movie' : 'photo'}
-                                    handleCaptionsChange={this.handlerCaptionsChange.bind(this)}
-                                    onAddCaptionButtonClick={this.onAddCaptionButtonClick}
+                                    handleTextTracksChange={this.handlerTextTracksChange.bind(this)}
+                                    onAddTextTrackButtonClick={this.onAddTextTrackButtonClick}
                                 />
-                            </EditCaption>
+                            </EditTextTrack>
 
+                            <TextTracksField
+                                kind={"chapter"}
+                                figures={this.state.figures}
+                                contentType={project.content[0].type === 'Figure::Frame' ? 'movie' : 'photo'}
+                                handleTextTracksChange={this.handlerTextTracksChange.bind(this)}
+                                onAddTextTrackButtonClick={this.onAddTextTrackButtonClick}
+                            />
 
                             <DescriptionFieldWrapper>
                                 <EditTarget>Description</EditTarget>

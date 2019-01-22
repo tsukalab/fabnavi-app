@@ -17,7 +17,7 @@ export const PageTitle = styled.h1`
     font-size: 38px;
 `;
 
-export const EditCaption = styled.div`
+export const EditTextTrack = styled.div`
     display: flex;
     margin-top: 40px;
     margin-bottom: 50px;
@@ -48,6 +48,7 @@ export const InputPrivate = styled.input`
 
 export const DescriptionFieldWrapper = styled.div`
     margin-bottom: 50px;
+    clear: right;
 `;
 
 export const DescriptionField = styled.textarea`

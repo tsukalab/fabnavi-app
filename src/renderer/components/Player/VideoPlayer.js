@@ -60,12 +60,14 @@ export class VideoPlayer extends React.Component {
             const currentMinus5Sec = this.player.currentTime() - 5 || 0;
             setTimeout(() => {
                 this.player.playlist.currentItem(index);
+                this.updateChapterMarkers(figures[this.player.playlist.currentIndex()]);
                 setTimeout(() => this.player.currentTime(currentMinus5Sec), 0);
             }, 0);
         });
     }
 
     updateChapterMarkers(figure) {
+        if(typeof this.player.markers === 'function')this.player.markers({markers: []});
         if(!this.player.markers.destroy) return;
         this.player.markers.destroy();
         if(!figure) return;
@@ -89,9 +91,6 @@ export class VideoPlayer extends React.Component {
                 'vjs-summary-play': {}
             }
         });
-
-        if(typeof this.player.markers === 'function')this.player.markers({markers: []});
-        this.updateChapterMarkers(this.props.project.content.filter(content => content.figure).map(content => content.figure)[0]);
         this.updatePlaylist(this.props.project);
         this.player.playlist.autoadvance(0);
         this.player.on('play', () => {
