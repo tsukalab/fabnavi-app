@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import TextTrackField from './TextTrackField';
 
 import {
-    EditBanner,
     StyledTextTracksField,
     TextTrackFieldSpan,
     StyledTextTrackFieldHeader,
@@ -17,7 +16,6 @@ import {
 const TextTracksField = ({ kind, figures, contentType, handleTextTracksChange, onAddTextTrackButtonClick }) => {
     return (
         <StyledTextTracksField>
-            <EditBanner className="edit"> {kind.charAt(0).toUpperCase() + kind.slice(1).toLowerCase()} </EditBanner>
             <StyledTextTrackFieldHeader>
                 <TextTrackFieldSpan text="start" contentType={contentType}>start(h:m:s)</TextTrackFieldSpan>
                 <TextTrackFieldSpan text="end" contentType={contentType}>end(h:m:s)</TextTrackFieldSpan>

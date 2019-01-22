@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import Debug from 'debug';
 
 import { connect } from 'react-redux';
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import "react-tabs/style/react-tabs.css";
 import { debounce } from 'throttle-debounce';
 
 import { updateProject } from '../actions/manager';
@@ -11,6 +13,7 @@ import Player from './Player';
 import TextTracksField from './ProjectEditForm/TextTracksField';
 
 import { EditPage, PageTitle, EditTextTrack, InputTitle, InputPrivate, DescriptionFieldWrapper, DescriptionField, SaveButton, EditTarget } from '../stylesheets/application/ProjectEditForm';
+import { EditBanner } from '../stylesheets/application/ProjectEditForm/TextTracksField';
 
 const debug = Debug('fabnavi:jsx:ProjectEditForm');
 
@@ -240,22 +243,32 @@ export class ProjectEditForm extends React.Component {
                                     handleThumbanailOrderChange={this.handleThumbanailOrderChange.bind(this)}
                                     ref={instance => (this.player = instance)}
                                 />
-                                <TextTracksField
-                                    kind={"caption"}
-                                    figures={this.state.figures}
-                                    contentType={project.content[0].type === 'Figure::Frame' ? 'movie' : 'photo'}
-                                    handleTextTracksChange={this.handlerTextTracksChange.bind(this)}
-                                    onAddTextTrackButtonClick={this.onAddTextTrackButtonClick}
-                                />
-                            </EditTextTrack>
+                                <Tabs>
+                                    <TabList>
+                                        <Tab><EditBanner>Caption</EditBanner></Tab>
+                                        <Tab><EditBanner>Chapter</EditBanner></Tab>
+                                    </TabList>
 
-                            <TextTracksField
-                                kind={"chapter"}
-                                figures={this.state.figures}
-                                contentType={project.content[0].type === 'Figure::Frame' ? 'movie' : 'photo'}
-                                handleTextTracksChange={this.handlerTextTracksChange.bind(this)}
-                                onAddTextTrackButtonClick={this.onAddTextTrackButtonClick}
-                            />
+                                    <TabPanel>
+                                        <TextTracksField
+                                            kind={"caption"}
+                                            figures={this.state.figures}
+                                            contentType={project.content[0].type === 'Figure::Frame' ? 'movie' : 'photo'}
+                                            handleTextTracksChange={this.handlerTextTracksChange.bind(this)}
+                                            onAddTextTrackButtonClick={this.onAddTextTrackButtonClick}
+                                        />
+                                    </TabPanel>
+                                    <TabPanel>
+                                        <TextTracksField
+                                            kind={"chapter"}
+                                            figures={this.state.figures}
+                                            contentType={project.content[0].type === 'Figure::Frame' ? 'movie' : 'photo'}
+                                            handleTextTracksChange={this.handlerTextTracksChange.bind(this)}
+                                            onAddTextTrackButtonClick={this.onAddTextTrackButtonClick}
+                                        />
+                                    </TabPanel>
+                                </Tabs>
+                            </EditTextTrack>
 
                             <DescriptionFieldWrapper>
                                 <EditTarget>Description</EditTarget>
