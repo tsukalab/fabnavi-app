@@ -1,14 +1,14 @@
 import styled, { css } from 'styled-components';
 
-const willRemoveCaptionProperty = css`
+const willRemoveTextTrackProperty = css`
     filter: brightness(0.8);
     opacity: 0.6;
 `;
 
-export const StyledCaptionField = styled.li`
+export const StyledTextTrackField = styled.li`
     margin-left: 100px;
     margin-bottom: 10px;
-    ${props => props.willBeRemoved ? willRemoveCaptionProperty : null}
+    ${props => props.willBeRemoved ? willRemoveTextTrackProperty : null}
 `;
 
 

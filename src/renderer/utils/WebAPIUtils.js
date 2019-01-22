@@ -293,6 +293,17 @@ class Server {
                                         _destroy: caption._destroy
                                     };
                                 }
+                            ),
+                            chapters_attributes: figure.chapters.map(
+                                chapter => {
+                                    return {
+                                        id: chapter.id,
+                                        name: chapter.name,
+                                        start_sec: chapter.start_sec,
+                                        end_sec: chapter.end_sec,
+                                        _destroy: chapter._destroy
+                                    };
+                                }
                             )
                         };
                     })
