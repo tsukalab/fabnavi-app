@@ -14,6 +14,7 @@ import ProjectManager from './components/ProjectManager';
 import ProjectPlayer from './components/ProjectPlayer';
 import CreateProject from './components/CreateProject';
 import ProjectEditForm from './components/ProjectEditForm';
+import ProjectSensorTagging from './components/ProjectSensorTagging';
 import ProjectDetail from './components/ProjectDetail';
 import WorkSpace from './components/WorkSpace';
 
@@ -95,6 +96,7 @@ window.addEventListener('DOMContentLoaded', () => {
                                     <Route component={CreateProject} path="/create" />
                                     <Route component={ProjectEditForm} path="/edit/:projectId" />
                                     <Route component={ProjectDetail} path="/detail/:projectId" />
+                                    <Route component={ProjectSensorTagging} path="/sensor/:projectId" />
                                 </Switch>
                             </ProjectManager>
                         )}

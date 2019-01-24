@@ -132,7 +132,6 @@ class TagList extends React.Component {
     }else if(tag.indexOf('ドライバー') != -1){
       return "#39EEF4"
     }
-    c
     return '#' + Math.floor(Math.random() * 16777215).toString(16);
   }
 

@@ -6,7 +6,7 @@ import { push } from 'react-router-redux';
 
 import { sanitizeProject } from '../utils/projectUtils';
 import { confirmDeleteProject } from '../actions/manager';
-import { StyledEditButton, StyledDeleteButton } from '../stylesheets/application/ProjectShow/ProjectSettings';
+import { StyledEditButton, StyledSensorButton, StyledDeleteButton } from '../stylesheets/application/ProjectShow/ProjectSettings';
 
 const debug = Debug('fabnavi:js:ProjectSettings');
 
@@ -17,6 +17,12 @@ class ProjectSettings extends React.Component {
         this.jumpToEdit = () => {
             if(this.props.project) {
                 this.props.jumpToEdit(this.props.project.id);
+            }
+        };
+
+        this.jumpToSensor = () => {
+            if(this.props.project) {
+                this.props.jumpToSensor(this.props.project.id);
             }
         };
 
@@ -33,11 +39,13 @@ class ProjectSettings extends React.Component {
         const project = sanitizeProject(this.props.project);
         const isEditable = this.props.userIsAdmin || project.user.id === this.props.userId;
         const isDeletable = project.user.id === this.props.userId;
+        const isEditableSensorTag = isEditable && this.props.project.sensor_infos.length > 0; 
         return (
             <div>
                 {isProjectSettings ? (
                     <div>
                         {isEditable && <EditButton handleClick={this.jumpToEdit} />}
+                        {isEditableSensorTag && <EditSensorTagButton handleClick={this.jumpToSensor}/>}
                         {isDeletable && <DeleteButton handleClick={this.openDeleteModal} />}
                     </div>
                 ) : null}
@@ -50,6 +58,14 @@ const EditButton = ({ handleClick }) => {
     return (
         <div onClick={() => handleClick()}>
             <StyledEditButton>Edit</StyledEditButton>
+        </div>
+    );
+};
+
+const EditSensorTagButton = ({ handleClick }) => {
+    return (
+        <div onClick={() => handleClick()}>
+            <StyledSensorButton>Sensor</StyledSensorButton>
         </div>
     );
 };
@@ -68,6 +84,7 @@ ProjectSettings.propTypes = {
     userIsAdmin: PropTypes.bool,
     mode: PropTypes.string,
     jumpToEdit: PropTypes.func,
+    jumpToSensor: PropTypes.func,
     openDeleteModal: PropTypes.func
 };
 
@@ -89,6 +106,9 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     jumpToEdit: projectId => {
         dispatch(push(`/edit/${projectId}`));
+    },
+    jumpToSensor: projectId => {
+        dispatch(push(`/sensor/${projectId}`));
     },
     openDeleteModal: projectId => {
         dispatch(confirmDeleteProject(projectId));
