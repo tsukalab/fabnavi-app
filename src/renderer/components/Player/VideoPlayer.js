@@ -84,6 +84,14 @@ export class VideoPlayer extends React.Component {
         return this.player.currentTime();
     }
 
+    getDuration() {
+        return this.player.duration();
+    }
+
+    changeCurrentTime(seconds){
+        this.player.currentTime(seconds)
+    }
+
     componentDidMount() {
         // instantiate Video.js
         this.player = videojs(this.videoNode, {
@@ -97,6 +105,11 @@ export class VideoPlayer extends React.Component {
             this.props.videoChanged(this.player.playlist.currentIndex());
             this.setState({ index: this.player.playlist.currentIndex() });
         });
+        if (this.props.handlePlayerTimeUpdate != null) {
+            this.player.on('timeupdate', () => {
+                this.props.handlePlayerTimeUpdate(this.getCurrentTime())
+            });
+        }
     }
 
     // destroy player on unmount
@@ -159,7 +172,8 @@ VideoPlayer.propTypes = {
     toggleUpdate: PropTypes.bool,
     isEditable:PropTypes.bool,
     size: PropTypes.string,
-    videoChanged: PropTypes.func
+    videoChanged: PropTypes.func,
+    handlePlayerTimeUpdate: PropTypes.func,
 };
 
 export default connect(

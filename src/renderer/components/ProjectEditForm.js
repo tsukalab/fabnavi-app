@@ -8,11 +8,14 @@ import "react-tabs/style/react-tabs.css";
 import { debounce } from 'throttle-debounce';
 
 import { updateProject } from '../actions/manager';
+import SensorGraph from './SensorGraph/SensorGraph';
+import TagList from './SensorGraph/TagList';
 
 import Player from './Player';
 import TextTracksField from './ProjectEditForm/TextTracksField';
 
 import { EditPage, PageTitle, EditTextTrack, InputTitle, InputPrivate, DescriptionFieldWrapper, DescriptionField, SaveButton, EditTarget } from '../stylesheets/application/ProjectEditForm';
+import { TagListField, SensorGraphField, SensorGraphWrapper, ItemsWrapper, Item, CreateButton, EditSensorGraph, InputTextWrapper, InputText } from '../stylesheets/sensor/SensorGraph';
 import { EditBanner } from '../stylesheets/application/ProjectEditForm/TextTracksField';
 
 const debug = Debug('fabnavi:jsx:ProjectEditForm');
@@ -84,6 +87,37 @@ export class ProjectEditForm extends React.Component {
             });
         };
 
+        this.onAddTextTrackButtonClickFromSensor = e => {
+            e.preventDefault();
+            const index = this.player.getWrappedInstance().getIndex();
+            if(!this.state.figures) return;
+            const currentTime = this.player.getWrappedInstance().getCurrentTime();
+            this.setState({
+                figures: this.state.figures
+                    .sort((a, b) => a.position - b.position)
+                    .map((figure, i) => {
+                        if (i !== index) return figure;
+                        if (this.currentTextTrack === 0) {
+                            figure.captions.push({
+                                id: null,
+                                start_sec: this.brushedRange[0],
+                                end_sec: this.brushedRange[1],
+                                text: this.refs.tagNameTxt.value
+                            });
+                        } else if (this.currentTextTrack === 1) {
+                            figure.chapters.push({
+                                id: null,
+                                start_sec: this.brushedRange[0],
+                                end_sec: this.brushedRange[1],
+                                name: this.refs.tagNameTxt.value
+                            });
+                        }
+                        return figure;
+                    })
+            });
+        };
+    
+
         this.updatePlayer = figures => {
             const content = this.state.project.content.map((cont, i) => {
                 cont.figure = figures[i];
@@ -102,8 +136,18 @@ export class ProjectEditForm extends React.Component {
             private: false,
             figures: [],
             captions: [],
-            chapters: []
+            chapters: [],
+            ax: true,
+            ay: true,
+            az: true,
+            gx: true,
+            gy: true,
+            gz: true,
         };
+
+        this.currentShowGraph = 0;
+        this.currentTextTrack = 0;
+        this.brushedRange = null;
     }
 
     handlerTextTracksChange(e) {
@@ -174,6 +218,52 @@ export class ProjectEditForm extends React.Component {
         this.setState({ figures: figures });
     }
 
+    handlePlayerTimeUpdate(time){
+        if (this.currentShowGraph == 0) {
+            this.leftChart.getWrappedInstance().moveTimeBar(time, this.player.getWrappedInstance().getDuration())
+            this.rightChart.getWrappedInstance().moveTimeBar(time, this.player.getWrappedInstance().getDuration())
+        } else if (this.currentShowGraph == 1) {
+            this.heartrateChart.getWrappedInstance().moveTimeBar(time, this.player.getWrappedInstance().getDuration())
+        }
+    }
+
+    handleSensorGraphSelect = index => {
+        if (index == 0) {
+            this.currentShowGraph = 0;
+        } else if (index == 1) {
+            this.currentShowGraph = 1;
+        }
+    }
+
+    handleTextTrackSelect = index => {
+        if (index == 0) {
+            this.currentTextTrack = 0;
+        } else if (index == 1) {
+            this.currentTextTrack = 1;
+        }
+    }
+
+    changeCurrentTime = (seconds) => {
+        if (seconds != -1) {
+            this.player.getWrappedInstance().changeCurrentTime(seconds);
+        }
+    }
+
+    onChartItemsChange = e => {
+        if (e.target.checked) {
+            this.leftChart.getWrappedInstance().addItem(e.target.id.slice(0, 2))
+            this.rightChart.getWrappedInstance().addItem(e.target.id.slice(0, 2))
+        } else {
+            this.leftChart.getWrappedInstance().removeItem(e.target.id.slice(0, 2))
+            this.rightChart.getWrappedInstance().removeItem(e.target.id.slice(0, 2))
+        }
+    }
+
+    setBrushedRange = (brushedRange) => {
+        this.brushedRange = brushedRange;
+        console.log(this.brushedRange)
+    }
+
     componentWillReceiveProps(props) {
         if(props.project !== null) {
             this.setState({
@@ -241,9 +331,10 @@ export class ProjectEditForm extends React.Component {
                                     isEditable={true}
                                     handleThumbnailDeleteButtonClick={this.handleThumbnailDeleteButtonClick.bind(this)}
                                     handleThumbanailOrderChange={this.handleThumbanailOrderChange.bind(this)}
+                                    handlePlayerTimeUpdate={this.handlePlayerTimeUpdate.bind(this)}
                                     ref={instance => (this.player = instance)}
                                 />
-                                <Tabs>
+                                <Tabs onSelect={this.handleTextTrackSelect}>
                                     <TabList>
                                         <Tab><EditBanner>Caption</EditBanner></Tab>
                                         <Tab><EditBanner>Chapter</EditBanner></Tab>
@@ -269,6 +360,79 @@ export class ProjectEditForm extends React.Component {
                                     </TabPanel>
                                 </Tabs>
                             </EditTextTrack>
+
+                            <EditSensorGraph>
+                                <Tabs onSelect={this.handleSensorGraphSelect} forceRenderTabPanel={true}>
+                                    <TabList>
+                                            <Tab>motion</Tab>
+                                            <Tab>heart</Tab>
+                                    </TabList>
+                                    <TabPanel>
+                                            <SensorGraphWrapper>
+                                                <TagListField>
+                                                    <TagList
+                                                        tagList={this.tags}
+                                                        removeTag={this.removeTag}
+                                                        ref={instance => { this.leftTagList = instance; }} />
+                                                    <TagList
+                                                        tagList={this.tags}
+                                                        removeTag={this.removeTag}
+                                                        ref={instance => { this.rightTagList = instance; }} />
+                                                </TagListField>
+                                                <SensorGraphField>
+                                                    <SensorGraph
+                                                        data='left'
+                                                        changeCurrentTime={this.changeCurrentTime}
+                                                        setBrushedRange={this.setBrushedRange}
+                                                        ref={instance => { this.leftChart = instance; }} />
+                                                    <SensorGraph
+                                                        data='right'
+                                                        changeCurrentTime={this.changeCurrentTime}
+                                                        setBrushedRange={this.setBrushedRange}
+                                                        ref={instance => { this.rightChart = instance; }} />
+                                                </SensorGraphField>
+                                            </SensorGraphWrapper>
+                                            <ItemsWrapper>
+                                                <Item>
+                                                    <input id="ax_checkbox" type="checkbox" defaultChecked={this.state.ax} onChange={this.onChartItemsChange} />
+                                                    <font color="#f28c36">加速度X</font>
+                                                </Item>
+                                                <Item className="item">
+                                                    <input id="ay_checkbox" type="checkbox" defaultChecked={this.state.ay} onChange={this.onChartItemsChange} />
+                                                    <font color="#e54520">加速度Y</font>
+                                                </Item>
+                                                <Item className="item">
+                                                    <input id="az_checkbox" type="checkbox" defaultChecked={this.state.az} onChange={this.onChartItemsChange} />
+                                                    <font color="#629ac9">加速度Z</font>
+                                                </Item>
+                                                <Item className="item">
+                                                    <input id="gx_checkbox" type="checkbox" defaultChecked={this.state.gx} onChange={this.onChartItemsChange} />
+                                                    <font color="#cfe43f">角速度X</font>
+                                                </Item>
+                                                <Item className="item">
+                                                    <input id="gy_checkbox" type="checkbox" defaultChecked={this.state.gy} onChange={this.onChartItemsChange} />
+                                                    <font color="#CCCC00">角速度Y</font>
+                                                </Item>
+                                                <Item className="item">
+                                                    <input id="gz_checkbox" type="checkbox" defaultChecked={this.state.gz} onChange={this.onChartItemsChange} />
+                                                    <font color="#8e37ca">角速度Z</font>
+                                                </Item>
+                                                <InputTextWrapper>
+                                                    テキスト: <input type="text" name="tag_name_txt" ref="tagNameTxt" />
+                                                </InputTextWrapper>
+                                                <CreateButton type="button" onClick={this.onAddTextTrackButtonClickFromSensor}> 作成 </CreateButton>
+                                            </ItemsWrapper>
+                                        
+                                    </TabPanel>
+                                    <TabPanel>
+                                            <SensorGraph
+                                                data='heartrate'
+                                                changeCurrentTime={this.changeCurrentTime}
+                                                setBrushedRange={this.setBrushedRange}
+                                                ref={instance => { this.heartrateChart = instance; }} />
+                                    </TabPanel>
+                                </Tabs>
+                                </EditSensorGraph>
 
                             <DescriptionFieldWrapper>
                                 <EditTarget>Description</EditTarget>

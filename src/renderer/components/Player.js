@@ -79,6 +79,7 @@ export class Player extends React.Component {
                         videoChanged={this.videoChanged}
                         size={this.props.size}
                         isEditable={this.props.isEditable}
+                        handlePlayerTimeUpdate={this.props.handlePlayerTimeUpdate}
                         ref={instance => (this.videoPlayer = instance)}
                     />
                 ) : (
@@ -209,6 +210,20 @@ export class Player extends React.Component {
             0;
     }
 
+    getDuration(){
+        return this.videoPlayer ?
+        this.videoPlayer.getWrappedInstance().getDuration() :
+        0;
+    }
+
+    getIndex(){
+        return this.state.index;
+    }
+
+    changeCurrentTime(seconds){
+        this.videoPlayer ? this.videoPlayer.getWrappedInstance().changeCurrentTime(seconds) : null
+    }
+
     componentWillReceiveProps(props) {
         if(props.project)this.setState({ project: props.project, toggleUpdate: !this.state.toggleUpdate });
     }
@@ -243,7 +258,8 @@ Player.propTypes = {
     size: PropTypes.string,
     isEditable: PropTypes.bool,
     handleThumbnailDeleteButtonClick: PropTypes.func,
-    handleThumbanailOrderChange: PropTypes.func
+    handleThumbanailOrderChange: PropTypes.func,
+    handlePlayerTimeUpdate: PropTypes.func,
 };
 export default connect(
     mapStateToProps,
