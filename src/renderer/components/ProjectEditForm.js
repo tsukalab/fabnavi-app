@@ -383,11 +383,13 @@ export class ProjectEditForm extends React.Component {
                                                     <SensorGraph
                                                         data='left'
                                                         changeCurrentTime={this.changeCurrentTime}
+                                                        currentRoute="edit"
                                                         setBrushedRange={this.setBrushedRange}
                                                         ref={instance => { this.leftChart = instance; }} />
                                                     <SensorGraph
                                                         data='right'
                                                         changeCurrentTime={this.changeCurrentTime}
+                                                        currentRoute="edit"
                                                         setBrushedRange={this.setBrushedRange}
                                                         ref={instance => { this.rightChart = instance; }} />
                                                 </SensorGraphField>
@@ -428,6 +430,7 @@ export class ProjectEditForm extends React.Component {
                                             <SensorGraph
                                                 data='heartrate'
                                                 changeCurrentTime={this.changeCurrentTime}
+                                                currentRoute="edit"
                                                 setBrushedRange={this.setBrushedRange}
                                                 ref={instance => { this.heartrateChart = instance; }} />
                                     </TabPanel>

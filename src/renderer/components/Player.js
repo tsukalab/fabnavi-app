@@ -80,6 +80,7 @@ export class Player extends React.Component {
                         size={this.props.size}
                         isEditable={this.props.isEditable}
                         handlePlayerTimeUpdate={this.props.handlePlayerTimeUpdate}
+                        setDuration={this.props.setDuration}
                         ref={instance => (this.videoPlayer = instance)}
                     />
                 ) : (
@@ -260,6 +261,7 @@ Player.propTypes = {
     handleThumbnailDeleteButtonClick: PropTypes.func,
     handleThumbanailOrderChange: PropTypes.func,
     handlePlayerTimeUpdate: PropTypes.func,
+    setDuration: PropTypes.func
 };
 export default connect(
     mapStateToProps,

@@ -72,7 +72,7 @@ class TagList extends React.Component {
     this.state.tags = tags
 
     tags.forEach(tag => {
-      this.appendTag(tag.selection, tag.tag, tag.id)
+      this.appendTag(tag.selection, tag.name, tag.id)
     });
   }
 

@@ -238,11 +238,24 @@ class SensorGraph extends React.Component {
         if (d3.event.selection != null) {
             if (d3.event.sourceEvent.type == 'mouseup') {
                 this.s = d3.event.selection || x.range();
-                this.props.setBrushedRange(this.s.map(x.invert, x).map((time => {
-                    return Math.floor((time - this.state.data[0].date) / 1000);
-                })));
-                console.log(this.s.map(x.invert, x)[0])//+ ':' + this.s.map(x.invert, x)[0].getMilliseconds());
-                console.log(this.s.map(x.invert, x)[1])//+ ':' + this.s.map(x.invert, x)[1].getMilliseconds());
+                if (this.props.currentRoute === 'edit') {
+                    this.props.setBrushedRange(this.s.map(x.invert, x).map((time => {
+                        return Math.floor((time - this.state.data[0].date) / 1000);
+                    })));
+                } else if (this.props.currentRoute === 'tagging') {
+                    const time = this.s.map(x.invert, x).map((datetime) => {
+                        const hours = ("0" + datetime.getHours()).slice(-2);
+                        const minutes = ("0" + datetime.getMinutes()).slice(-2);
+                        const seconds = ("0" + datetime.getSeconds()).slice(-2);
+                        const milliseconds = ("0" + datetime.getMilliseconds()).slice(-3);
+                        return hours + minutes + seconds + milliseconds;
+
+                    })
+                    const sec =this.s.map(x.invert, x).map((time => {
+                        return Math.floor((time - this.state.data[0].date) / 1000);
+                    }));
+                    this.props.setBrushedRange(d3.event.selection || x.range(), time, sec);
+                }
             } else {
                 this.props.setBrushedRange(null);
             }
@@ -482,6 +495,7 @@ class SensorGraph extends React.Component {
 SensorGraph.propTypes = {
     project: PropTypes.object,
     data: PropTypes.string,
+    currentRoute: PropTypes.string,
     changeCurrentTime: PropTypes.func,
     setBrushedRange: PropTypes.func,
 };

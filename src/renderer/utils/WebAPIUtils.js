@@ -389,6 +389,30 @@ class Server {
             .then(() => debug('sign out: success'))
             .catch(err => debug('sign out: failed', err));
     }
+
+    async motionDetect(sensor_infos) {
+        debug(`motionDetect sensor_infos:${sensor_infos}`);
+        const sensor_urls = sensor_infos[0].indexOf('left') !== -1 ? sensor_infos.reverse() : sensor_infos;
+        const options = {
+            responseType: 'json',
+            method: 'get',
+            url: `http://10.24.195.172:80/motion/recognition.json?left_url=${sensor_urls[0]}&right_url=${sensor_urls[1]}`
+        };
+        return axios(options)
+        .then(() => debug('sign out: success'))
+        .catch(err => debug('sign out: failed', err));;
+    }
+
+    async createTrainData(sensor_infos, hoge) {
+        debug(`createTrainData tags:${hoge}`);
+        const sensor_urls = sensor_infos[0].data.url.indexOf('left') !== -1 ? sensor_infos.reverse() : sensor_infos;
+        return axios({
+            responseType: 'json',
+            data: {tags: hoge},
+            method: 'POST',
+            url: `http://10.24.195.172:80/motion/create.json?left_url=${sensor_urls[0].data.url}&right_url=${sensor_urls[1].data.url}`,
+        })
+    }
 }
 
 const api = new Server();

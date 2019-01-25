@@ -110,6 +110,11 @@ export class VideoPlayer extends React.Component {
                 this.props.handlePlayerTimeUpdate(this.getCurrentTime())
             });
         }
+        this.player.on('loadedmetadata', () => {
+            if(this.props.setDuration() !== null){
+                this.props.setDuration();
+            }
+        });
     }
 
     // destroy player on unmount
@@ -173,6 +178,7 @@ VideoPlayer.propTypes = {
     isEditable:PropTypes.bool,
     size: PropTypes.string,
     videoChanged: PropTypes.func,
+    setDuration: PropTypes.func,
     handlePlayerTimeUpdate: PropTypes.func,
 };
 

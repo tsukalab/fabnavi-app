@@ -38,6 +38,8 @@ class ProjectSensorTagging extends React.Component {
 
         this.currentShowGraph = 0;
         this.brushedRange = null;
+        this.brushedTime = null;
+        this.brushedSec = null;
         this.modalIsOpen = false;
 
         this.state = {
@@ -48,6 +50,7 @@ class ProjectSensorTagging extends React.Component {
             gy: true,
             gz: true,
             tags: [],
+            newTags:[],
             currentMovie: 0,
         }
 
@@ -112,7 +115,16 @@ class ProjectSensorTagging extends React.Component {
                 this.state.tags.push({
                     id: tags_id,
                     tag: tag.name,
-                    selection: [tag.start_sec, tag.end_sec],
+                    start_sec: tag.start_sec,
+                    end_sec: tag.end_sec,
+                    tags_num: this.state.figures[this.state.currentMovie].chapters.length - 1,
+                })
+
+                this.state.newTags.push({
+                    id: tags_id,
+                    tag: tag.name,
+                    start_sec: tag.start_sec,
+                    end_sec: tag.end_sec,
                     tags_num: this.state.figures[this.state.currentMovie].chapters.length - 1,
                 })
 
@@ -148,6 +160,7 @@ class ProjectSensorTagging extends React.Component {
                 figure.chapters = chapters;
                 return figure;
             })
+            
             this.props.updateProject(
                 Object.assign({}, this.props.project, {
                     name: this.props.project.name,
@@ -156,6 +169,9 @@ class ProjectSensorTagging extends React.Component {
                     figures: figures
                 })
             );
+
+            api.createTrainData(this.props.project.sensor_infos, this.state.tags);
+
         };
     };
 
@@ -174,8 +190,10 @@ class ProjectSensorTagging extends React.Component {
         }
     }
 
-    setBrushedRange = (brushedRange) => {
+    setBrushedRange = (brushedRange, brushedTime, brushedSec) => {
         this.brushedRange = brushedRange
+        this.brushedTime = brushedTime
+        this.brushedSec = brushedSec
     }
 
     createTag = () => {
@@ -186,15 +204,15 @@ class ProjectSensorTagging extends React.Component {
                 if (i !== this.state.currentMovie) return figure;
                 figure.chapters.push({
                     id: null,
-                    start_sec: this.brushedRange[0],
-                    end_sec: this.brushedRange[1],
+                    start_sec: this.brushedSec[0],
+                    end_sec: this.brushedSec[1],
                     name: this.refs.tagNameTxt.value,
                     _destroy: false
                 });
                 figure.captions.push({
                     id: null,
-                    start_sec: this.brushedRange[0],
-                    end_sec: this.brushedRange[1],
+                    start_sec: this.brushedSec[0],
+                    end_sec: this.brushedSec[1],
                     text: this.refs.tagNameTxt.value,
                     _destroy: false
                 });
@@ -204,20 +222,25 @@ class ProjectSensorTagging extends React.Component {
 
         this.state.tags.push({
             id: tags_id,
-            tag: this.refs.tagNameTxt.value,
-            selection: [this.brushedRange[0], this.brushedRange[1]],
+            name: this.refs.tagNameTxt.value,
+            start_sec: this.brushedTime[0],
+            end_sec: this.brushedTime[1],
             tags_num: this.state.figures[this.state.currentMovie].chapters.length - 1,
         })
 
-        this.leftTagList.getWrappedInstance().setState({ tags: this.state.tags * 570 / this.player.getWrappedInstance().getDuration() })
-        this.rightTagList.getWrappedInstance().setState({ tags: this.state.tags * 570 / this.player.getWrappedInstance().getDuration() })
-
-        const tagRange = this.brushedRange.map((range) => {
-            return range * 570 / this.player.getWrappedInstance().getDuration()
+        this.state.newTags.push({
+            id: tags_id,
+            name: this.refs.tagNameTxt.value,
+            start_sec: this.brushedTime[0],
+            end_sec: this.brushedTime[1],
+            tags_num: this.state.figures[this.state.currentMovie].chapters.length - 1,
         })
 
-        this.leftTagList.getWrappedInstance().appendTag(tagRange, this.refs.tagNameTxt.value, tags_id)
-        this.rightTagList.getWrappedInstance().appendTag(tagRange, this.refs.tagNameTxt.value, tags_id)
+        this.leftTagList.getWrappedInstance().setState({ tags: this.state.tags })
+        this.rightTagList.getWrappedInstance().setState({ tags: this.state.tags })
+
+        this.leftTagList.getWrappedInstance().appendTag(this.brushedRange, this.refs.tagNameTxt.value, tags_id)
+        this.rightTagList.getWrappedInstance().appendTag(this.brushedRange, this.refs.tagNameTxt.value, tags_id)
     }
 
     removeTag = (id) => {
@@ -240,10 +263,12 @@ class ProjectSensorTagging extends React.Component {
         });
 
         const tags = this.state.tags.filter(tag => tag.tags_id !== id);
+        const newTags = this.state.newTags.filter(tag => newTag.tags_id !== id);
 
         this.setState({
             figures: figures,
             tags: tags,
+            newTags: newTags
         })
 
         this.leftTagList.getWrappedInstance().setState({ tags: this.state.tags })
@@ -262,7 +287,7 @@ class ProjectSensorTagging extends React.Component {
         return random;
     }
 
-    renderHeartRate(props) {
+    renderHeartRate() {
         return (
             <SensorGraph
                 data='heartrate'
@@ -270,6 +295,27 @@ class ProjectSensorTagging extends React.Component {
                 setBrushedRange={this.setBrushedRange}
                 ref={instance => { this.heartrateChart = instance; }} />
         );
+    }
+
+    initTags() {
+        const duration = this.player.getWrappedInstance().getDuration();
+        const chapters = this.props.project.content[0].figure.chapters;
+        var tags = [];
+        chapters.forEach((chapter, i) => {
+            var tag = {
+                "id": chapter.id,
+                "name": chapter.name,
+                "selection": [chapter.start_sec * 570 / duration, chapter.end_sec * 570 / duration],
+                "tags_num": i
+            }
+            tags.push(tag);
+        });
+        this.setState({
+            tags: tags
+        });
+
+        this.leftTagList.getWrappedInstance().renderTags(tags)
+        this.rightTagList.getWrappedInstance().renderTags(tags)
     }
 
     render() {
@@ -281,6 +327,7 @@ class ProjectSensorTagging extends React.Component {
                     handleThumbnailDeleteButtonClick={null}
                     handleThumbanailOrderChange={null}
                     handlePlayerTimeUpdate={this.handlePlayerTimeUpdate.bind(this)}
+                    setDuration={this.initTags.bind(this)}
                     ref={instance => (this.player = instance)}
                 />
                 <TaggingSensorGraph>
@@ -305,11 +352,13 @@ class ProjectSensorTagging extends React.Component {
                                     <SensorGraph
                                         data='left'
                                         changeCurrentTime={this.changeCurrentTime}
+                                        currentRoute="tagging"
                                         setBrushedRange={this.setBrushedRange}
                                         ref={instance => { this.leftChart = instance; }} />
                                     <SensorGraph
                                         data='right'
                                         changeCurrentTime={this.changeCurrentTime}
+                                        currentRoute="tagging"
                                         setBrushedRange={this.setBrushedRange}
                                         ref={instance => { this.rightChart = instance; }} />
                                 </SensorGraphField>
@@ -351,6 +400,7 @@ class ProjectSensorTagging extends React.Component {
                             <SensorGraph
                                 data='heartrate'
                                 changeCurrentTime={this.changeCurrentTime}
+                                currentRoute="tagging"
                                 setBrushedRange={this.setBrushedRange}
                                 ref={instance => { this.heartrateChart = instance; }} />
                         </TabPanel>
@@ -374,29 +424,6 @@ class ProjectSensorTagging extends React.Component {
                 </ReactModal>
             </div>
         );
-    }
-
-    componentDidMount() {
-        if (this.props.project !== null) {
-            const duration = this.player.getWrappedInstance().getDuration();
-            const chapters = this.props.project.content[0].figure.chapters;
-            var tags = [];
-            chapters.forEach((chapter, i) => {
-                var tag = {
-                    "id": chapter.id,
-                    "tag": chapter.name,
-                    "selection": [chapter.start_sec * 570 / duration, chapter.end_sec * 570 / duration],
-                    "tags_num": i
-                }
-                tags.push(tag);
-            });
-            this.setState({
-                tags: tags
-            });
-
-            this.leftTagList.getWrappedInstance().renderTags(tags)
-            this.rightTagList.getWrappedInstance().renderTags(tags)
-        }
     }
 
     componentWillReceiveProps(props) {
