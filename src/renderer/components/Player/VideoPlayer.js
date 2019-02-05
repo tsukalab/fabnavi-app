@@ -52,7 +52,7 @@ export class VideoPlayer extends React.Component {
                     textTracks: [
                         buildCaptions(figure.captions.filter(caption => caption._destroy !== true)),
                         null,
-                        buildChapters(figure.chapters.filter(chapter => chapter._destroy !== true))
+                        buildChapters(figure.chapters.filter(chapter => chapter._destroy !== true).sort((chap1,chap2) => chap1.start_sec - chap2.start_sec))
                     ]
                 }
             };
