@@ -14,6 +14,7 @@ class SummaryPlayButton extends vjsButton {
     constructor(player, options) {
         super(player, options);
         this.isSummaryPlaying = false;
+        this.prevIsSummaryPlaying = false;
         this.cue = [];
 
         player.on('loadeddata', () => {
@@ -30,7 +31,11 @@ class SummaryPlayButton extends vjsButton {
                     if (player.currentTime() > cue.startTime - 2 && player.currentTime() < cue.endTime) return true;
                 })
                 if (hasActiveCues) player.playbackRate(1.0);
-                else player.playbackRate(8.0);
+                else player.playbackRate(16.0);
+            } 
+            if(this.isSummaryPlaying !== this.prevIsSummaryPlaying && !isSummaryPlaying){
+                player.playbackRate(1.0);
+                this.prevIsSummaryPlaying = this.isSummaryPlaying
             }
         });
     }

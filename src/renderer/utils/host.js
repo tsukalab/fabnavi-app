@@ -2,7 +2,7 @@ const isDev = require('electron-is-dev');
 
 class Host {
     constructor() {
-        this.url = isDev ? 'http://preview.fabnavi.org' : 'http://fabnavi.org';
+        this.url = isDev ? 'http://fabnavi.org' : 'http://preview.fabnavi.org';
     }
     set(url) {
         this.url = url;

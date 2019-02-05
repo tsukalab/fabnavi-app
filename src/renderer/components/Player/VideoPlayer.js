@@ -18,7 +18,8 @@ export class VideoPlayer extends React.Component {
         super(props);
         this.state = {
             isPlaying: false,
-            index: this.props.index
+            index: this.props.index,
+            isInit: false
         };
         this.handleClick = e => {
             const video = document.querySelector('video');
@@ -67,17 +68,21 @@ export class VideoPlayer extends React.Component {
     }
 
     updateChapterMarkers(figure) {
-        if(typeof this.player.markers === 'function')this.player.markers({markers: []});
-        if(!this.player.markers.destroy) return;
-        this.player.markers.destroy();
         if(!figure) return;
-        const markers = figure.chapters.map(chapter => {
+        const markers = figure.chapters.filter(chapter => chapter._destroy !== true).map(chapter => {
             return {
                 time: chapter.start_sec,
                 text: chapter.name
             }
         });
-        this.player.markers({ markers: markers });
+        if(!this.state.isInit) {
+            this.player.markers({ markers: markers });
+            this.state.isInit = true
+        }
+        else {
+            this.player.markers.reset(markers);
+            
+        }
     }
 
     getCurrentTime() {
@@ -127,6 +132,7 @@ export class VideoPlayer extends React.Component {
     componentWillReceiveProps(nextProps) {
         if(this.props.index !== nextProps.index) {
             this.player.playlist.currentItem(nextProps.index);
+            this.player.markers({markers: []});
             this.updateChapterMarkers(this.props.project.content.filter(content => content.figure).map(content => content.figure)[nextProps.index]);
         } else if(nextProps.project) {
             this.updatePlaylist(nextProps.project, this.player.playlist.currentIndex());
