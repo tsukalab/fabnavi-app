@@ -1,42 +1,38 @@
 import videojs from 'video.js';
-import './videojs-summary-play.scss';
+import './videojs-chapter-play.scss';
 
 // Default options for the plugin.
 const defaults = {
     beforeElement: 'fullscreenToggle',
-    textControl: 'Summary Play',
-    name: 'summaryPlayButton'
+    textControl: 'Chapter Play',
+    name: 'chapterPlayButton'
 };
 
 const vjsButton = videojs.getComponent('Button');
 
-class SummaryPlayButton extends vjsButton {
+class ChapterPlayButton extends vjsButton {
     constructor(player, options) {
         super(player, options);
-        this.isSummaryPlaying = false;
-        this.prevIsSummaryPlaying = false;
+        this.isChapterPlaying = false;
         this.cue = [];
 
         player.on('loadeddata', () => {
             this.cues = [];
-            if (player.textTracks().tracks_[0].cues_.length > 0) {
-                this.cues = player.textTracks().tracks_[0].cues_;
+            console.log(player.textTracks().tracks_)
+            if (player.textTracks().tracks_[2].cues_.length > 0) {
+                this.cues = player.textTracks().tracks_[2].cues_;
                 this.cues.sort((a, b) => a.startTime - b.startTime);
             }
         })
 
         player.on('timeupdate', () => {
-            if (this.isSummaryPlaying) {
-                var hasActiveCues = this.cues.some((cue) => {
-                    if (player.currentTime() > cue.startTime - 2 && player.currentTime() < cue.endTime) return true;
+            if (this.isChapterPlaying) {
+                var endCurrentChapter = this.cues.some((cue) => {
+                    if (player.currentTime() > cue.startTime - 2 && player.currentTime() < cue.endTime) return true
+                    else return false;
                 })
-                if (hasActiveCues) player.playbackRate(1.0);
-                else player.playbackRate(8.0);
+                if(!endCurrentChapter) player.markers.next();
             } 
-            if(this.isSummaryPlaying !== this.prevIsSummaryPlaying && !isSummaryPlaying){
-                player.playbackRate(1.0);
-                this.prevIsSummaryPlaying = this.isSummaryPlaying
-            }
         });
     }
 
@@ -47,17 +43,17 @@ class SummaryPlayButton extends vjsButton {
     * @method buildCSSClass
     */
     buildCSSClass() {
-        return `vjs-summary-play ${super.buildCSSClass()}`;
+        return `vjs-chapter-play ${super.buildCSSClass()}`;
     }
 
     /**
-    * Handles click for summary play
+    * Handles click for chapter play
     *
     * @method handleClick
     */
     handleClick(e) {
         e.stopPropagation();
-        this.isSummaryPlaying = !this.isSummaryPlaying;
+        this.isChapterPlaying = !this.isChapterPlaying;
         if(e.target.getAttribute('working') === 'true') {
             e.target.setAttribute('working', 'false');
         } else {
@@ -78,15 +74,15 @@ class SummaryPlayButton extends vjsButton {
  * @param    {Object} [options={}]
  */
 const onPlayerReady = (player, options) => {
-    const summaryPlayButton = player.controlBar.addChild(new SummaryPlayButton(player, options), {});
-    summaryPlayButton.controlText(options.textControl);
+    const chapterPlayButton = player.controlBar.addChild(new ChapterPlayButton(player, options), {});
+    chapterPlayButton.controlText(options.textControl);
 
     player.controlBar.el().insertBefore(
-        summaryPlayButton.el(),
+        chapterPlayButton.el(),
         player.controlBar.getChild(options.beforeElement).el()
     );
 
-    player.addClass('vjs-summary-play');
+    player.addClass('vjs-chapter-play');
 };
 
 /**
@@ -101,13 +97,13 @@ const onPlayerReady = (player, options) => {
  * @param    {Object} [options={}]
  *           An object of options left to the plugin author to define.
  */
-const vjsSummaryPlay = function(options) {
+const vjsChapterPlay = function(options) {
     this.ready(() => {
         onPlayerReady(this, videojs.mergeOptions(defaults, options));
     });
 };
 
 // Register the plugin with video.js.
-videojs.registerPlugin('vjs-summary-play', vjsSummaryPlay);
+videojs.registerPlugin('vjs-chapter-play', vjsChapterPlay);
 
-export default vjsSummaryPlay;
+export default vjsChapterPlay;

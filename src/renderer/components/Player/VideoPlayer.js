@@ -7,6 +7,7 @@ import 'videojs-playlist';
 import 'videojs-markers';
 import 'videojs-markers/dist/videojs.markers.css';
 import '../../utils/videojs-summary-play/videojs-summary-play'
+import '../../utils/videojs-chapter-play/videojs-chapter-play'
 
 import { VideoPanel, ImageType } from '../../stylesheets/player/Player';
 import { buildCaptions, buildFigureUrl, buildChapters } from '../../utils/playerUtils'
@@ -72,11 +73,27 @@ export class VideoPlayer extends React.Component {
         const markers = figure.chapters.filter(chapter => chapter._destroy !== true).map(chapter => {
             return {
                 time: chapter.start_sec,
-                text: chapter.name
+                text: chapter.name,
+                overlayText: chapter.name,
             }
         });
         if(!this.state.isInit) {
-            this.player.markers({ markers: markers });
+            this.player.markers({    
+                breakOverlay:{
+                display: true,
+                displayTime: 3,
+                style:{
+                   'width':'100%',
+                   'height': '10%',
+                   'background-color': 'rgba(0,0,0,0.7)',
+                   'color': 'white',
+                   'font-size': '20px'
+                },
+                text: function(marker) {
+                   return marker.overlayText;
+                }
+             },
+                markers: markers });
             this.state.isInit = true
         }
         else {
@@ -101,7 +118,8 @@ export class VideoPlayer extends React.Component {
         // instantiate Video.js
         this.player = videojs(this.videoNode, {
             plugins: {
-                'vjs-summary-play': {}
+                'vjs-summary-play': {},
+                'vjs-chapter-play': {}
             }
         });
         this.updatePlaylist(this.props.project);
