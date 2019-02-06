@@ -360,7 +360,6 @@ export class ProjectEditForm extends React.Component {
                                     </TabPanel>
                                 </Tabs>
                             </EditTextTrack>
-
                             <EditSensorGraph>
                                 <Tabs onSelect={this.handleSensorGraphSelect} forceRenderTabPanel={true}>
                                     <TabList>
@@ -424,7 +423,6 @@ export class ProjectEditForm extends React.Component {
                                                 </InputTextWrapper>
                                                 <CreateButton type="button" onClick={this.onAddTextTrackButtonClickFromSensor}> 作成 </CreateButton>
                                             </ItemsWrapper>
-                                        
                                     </TabPanel>
                                     <TabPanel>
                                             <SensorGraph
@@ -436,7 +434,6 @@ export class ProjectEditForm extends React.Component {
                                     </TabPanel>
                                 </Tabs>
                                 </EditSensorGraph>
-
                             <DescriptionFieldWrapper>
                                 <EditTarget>Description</EditTarget>
                                 <DescriptionField

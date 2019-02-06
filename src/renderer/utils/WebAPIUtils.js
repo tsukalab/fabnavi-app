@@ -390,7 +390,7 @@ class Server {
             .catch(err => debug('sign out: failed', err));
     }
 
-    async motionDetect(sensor_infos) {
+    /*async motionDetect(sensor_infos) {
         debug(`motionDetect sensor_infos:${sensor_infos}`);
         const sensor_urls = sensor_infos[0].indexOf('left') !== -1 ? sensor_infos.reverse() : sensor_infos;
         const options = {
@@ -401,6 +401,16 @@ class Server {
         return axios(options)
         .then(() => debug('sign out: success'))
         .catch(err => debug('sign out: failed', err));;
+    }*/
+
+    async motionDetect(id) {
+        debug(`motionDetect id:${id}`);
+        const options = {
+            responseType: 'json',
+            type: 'GET',
+            url: `http://192.168.134.148:3000/mock/detection/${id}`
+        };
+        return axios(options);
     }
 
     async createTrainData(sensor_infos, hoge) {

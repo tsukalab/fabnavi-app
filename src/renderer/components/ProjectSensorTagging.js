@@ -41,16 +41,23 @@ class ProjectSensorTagging extends React.Component {
         this.brushedTime = null;
         this.brushedSec = null;
         this.modalIsOpen = false;
+        this.tags = []
+        this.newTags = []
 
         this.state = {
+            project: this.props.project,
+            name: '',
+            description: '',
+            private: false,
+            figures: [],
+            captions: [],
+            chapters: [],
             ax: true,
             ay: true,
             az: true,
             gx: true,
             gy: true,
             gz: true,
-            tags: [],
-            newTags:[],
             currentMovie: 0,
         }
 
@@ -88,6 +95,7 @@ class ProjectSensorTagging extends React.Component {
         }
 
         this.addAutoTag = (tags) => {
+            const duration = this.player.getWrappedInstance().getDuration();
             tags.forEach(tag => {
                 var tags_id = this.getRandom();
 
@@ -112,7 +120,7 @@ class ProjectSensorTagging extends React.Component {
                     })
                 });
 
-                this.state.tags.push({
+                this.tags.push({
                     id: tags_id,
                     tag: tag.name,
                     start_sec: tag.start_sec,
@@ -120,7 +128,7 @@ class ProjectSensorTagging extends React.Component {
                     tags_num: this.state.figures[this.state.currentMovie].chapters.length - 1,
                 })
 
-                this.state.newTags.push({
+                this.newTags.push({
                     id: tags_id,
                     tag: tag.name,
                     start_sec: tag.start_sec,
@@ -128,15 +136,15 @@ class ProjectSensorTagging extends React.Component {
                     tags_num: this.state.figures[this.state.currentMovie].chapters.length - 1,
                 })
 
-                var listtag = [tag.start_sec, tag.end_sec]
+                var listtag = [tag.start_sec * 570 / duration, tag.end_sec * 570 / duration]
 
                 this.leftTagList.getWrappedInstance().appendTag(listtag, tag.name, tags_id)
                 this.rightTagList.getWrappedInstance().appendTag(listtag, tag.name, tags_id)
 
             });
 
-            this.leftTagList.getWrappedInstance().setState({ tags: this.state.tags })
-            this.rightTagList.getWrappedInstance().setState({ tags: this.state.tags })
+            this.leftTagList.getWrappedInstance().setState({ tags: this.tags })
+            this.rightTagList.getWrappedInstance().setState({ tags: this.tags })
 
             this.closeModal()
         }
@@ -170,7 +178,7 @@ class ProjectSensorTagging extends React.Component {
                 })
             );
 
-            api.createTrainData(this.props.project.sensor_infos, this.state.tags);
+            api.createTrainData(this.props.project.sensor_infos, this.tags);
 
         };
     };
@@ -220,7 +228,7 @@ class ProjectSensorTagging extends React.Component {
             })
         });
 
-        this.state.tags.push({
+        this.tags.push({
             id: tags_id,
             name: this.refs.tagNameTxt.value,
             start_sec: this.brushedTime[0],
@@ -228,7 +236,7 @@ class ProjectSensorTagging extends React.Component {
             tags_num: this.state.figures[this.state.currentMovie].chapters.length - 1,
         })
 
-        this.state.newTags.push({
+        this.newTags.push({
             id: tags_id,
             name: this.refs.tagNameTxt.value,
             start_sec: this.brushedTime[0],
@@ -236,8 +244,8 @@ class ProjectSensorTagging extends React.Component {
             tags_num: this.state.figures[this.state.currentMovie].chapters.length - 1,
         })
 
-        this.leftTagList.getWrappedInstance().setState({ tags: this.state.tags })
-        this.rightTagList.getWrappedInstance().setState({ tags: this.state.tags })
+        this.leftTagList.getWrappedInstance().setState({ tags: this.tags })
+        this.rightTagList.getWrappedInstance().setState({ tags: this.tags })
 
         this.leftTagList.getWrappedInstance().appendTag(this.brushedRange, this.refs.tagNameTxt.value, tags_id)
         this.rightTagList.getWrappedInstance().appendTag(this.brushedRange, this.refs.tagNameTxt.value, tags_id)
@@ -245,7 +253,7 @@ class ProjectSensorTagging extends React.Component {
 
     removeTag = (id) => {
 
-        const removeChapterId = this.state.tags.filter(tag => tag.id === id)[0].tags_num;
+        const removeChapterId = this.tags.filter(tag => tag.id === id)[0].tags_num;
 
         const figures = this.state.figures.map((figure, i) => {
             if (i !== this.state.currentMovie) return figure;
@@ -262,8 +270,8 @@ class ProjectSensorTagging extends React.Component {
             return figure;
         });
 
-        const tags = this.state.tags.filter(tag => tag.tags_id !== id);
-        const newTags = this.state.newTags.filter(tag => newTag.tags_id !== id);
+        const tags = this.tags.filter(tag => tag.tags_id !== id);
+        const newTags = this.newTags.filter(tag => newTag.tags_id !== id);
 
         this.setState({
             figures: figures,
@@ -271,8 +279,8 @@ class ProjectSensorTagging extends React.Component {
             newTags: newTags
         })
 
-        this.leftTagList.getWrappedInstance().setState({ tags: this.state.tags })
-        this.rightTagList.getWrappedInstance().setState({ tags: this.state.tags })
+        this.leftTagList.getWrappedInstance().setState({ tags: this.tags })
+        this.rightTagList.getWrappedInstance().setState({ tags: this.tags })
     }
 
     getRandom() {
@@ -280,7 +288,7 @@ class ProjectSensorTagging extends React.Component {
         var hasNumber = true;
         while (hasNumber) {
             random = Math.floor(Math.random() * (65000 + 1));
-            var filterTag = this.state.tags.filter(tag => tag.tags_id === random);
+            var filterTag = this.tags.filter(tag => tag.tags_id === random);
             var filterCaption = this.state.figures[0].captions.filter(caption => caption.id === random);
             if (filterTag.length <= 0 && filterCaption <= 0) hasNumber = false;
         }
@@ -321,15 +329,17 @@ class ProjectSensorTagging extends React.Component {
     render() {
         return (
             <div>
+                <center>
                 <Player
                     project={this.state.project}
-                    isEditable={true}
+                    isEditable={false}
                     handleThumbnailDeleteButtonClick={null}
                     handleThumbanailOrderChange={null}
                     handlePlayerTimeUpdate={this.handlePlayerTimeUpdate.bind(this)}
                     setDuration={this.initTags.bind(this)}
                     ref={instance => (this.player = instance)}
                 />
+                </center>
                 <TaggingSensorGraph>
                     <Tabs onSelect={this.handleSensorGraphSelect} forceRenderTabPanel={true}>
                         <TabList>
