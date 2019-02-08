@@ -150,7 +150,6 @@ export class VideoPlayer extends React.Component {
     componentWillReceiveProps(nextProps) {
         if(this.props.index !== nextProps.index) {
             this.player.playlist.currentItem(nextProps.index);
-            this.player.markers({markers: []});
             this.updateChapterMarkers(this.props.project.content.filter(content => content.figure).map(content => content.figure)[nextProps.index]);
         } else if(nextProps.project) {
             this.updatePlaylist(nextProps.project, this.player.playlist.currentIndex());
@@ -181,7 +180,7 @@ export class VideoPlayer extends React.Component {
                             className="video-js  vjs-default-skin vjs-big-play-centered"
                             controls={true}
                             preload="auto"
-                            style={this.props.size !== 'small' ? { marginTop: '33px' } : null}
+                            style={this.props.size !== 'small' ? { marginTop: '0px' } : null}
                         />
                     </div>
                 </div>

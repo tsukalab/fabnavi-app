@@ -271,13 +271,14 @@ class ProjectSensorTagging extends React.Component {
         });
 
         const tags = this.tags.filter(tag => tag.tags_id !== id);
-        const newTags = this.newTags.filter(tag => newTag.tags_id !== id);
+        const newTags = this.newTags.filter(tag => tag.tags_id !== id);
 
         this.setState({
             figures: figures,
-            tags: tags,
-            newTags: newTags
         })
+
+        this.tags = tags;
+        this.newTags = newTags;
 
         this.leftTagList.getWrappedInstance().setState({ tags: this.tags })
         this.rightTagList.getWrappedInstance().setState({ tags: this.tags })
