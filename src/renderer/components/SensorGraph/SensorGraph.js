@@ -238,6 +238,8 @@ class SensorGraph extends React.Component {
         if (d3.event.selection != null) {
             if (d3.event.sourceEvent.type == 'mouseup') {
                 this.s = d3.event.selection || x.range();
+                console.log(this.s.map(x.invert, x)[0].toLocaleString() + this.s.map(x.invert, x)[0].getMilliseconds());
+                console.log(this.s.map(x.invert, x)[1].toLocaleString() + this.s.map(x.invert, x)[1].getMilliseconds());
                 if (this.props.currentRoute === 'edit') {
                     this.props.setBrushedRange(this.s.map(x.invert, x).map((time => {
                         return Math.floor((time - this.state.data[0].date) / 1000);

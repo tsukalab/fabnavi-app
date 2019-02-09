@@ -88,9 +88,10 @@ class ProjectSensorTagging extends React.Component {
         }
 
         this.getAutoTags = () => {
-            const result = api.motionDetect(this.props.project.id)
+            const result = api.motionDetect(this.props.project.sensor_infos)
             result.then(response => {
                 this.addAutoTag(response.data.result)
+                this.closeModal()
             });
         }
 
@@ -104,15 +105,15 @@ class ProjectSensorTagging extends React.Component {
                         if (i !== this.state.currentMovie) return figure;
                         figure.chapters.push({
                             id: null,
-                            start_sec: tag.start_sec,
-                            end_sec: tag.end_sec,
+                            start_sec: Number(tag.start_sec),
+                            end_sec: Number(tag.end_sec),
                             name: tag.name,
                             _destroy: false
                         });
                         figure.captions.push({
                             id: null,
-                            start_sec: tag.start_sec,
-                            end_sec: tag.end_sec,
+                            start_sec: Number(tag.start_sec),
+                            end_sec: Number(tag.end_sec),
                             text: tag.name,
                             _destroy: false
                         });
@@ -123,20 +124,20 @@ class ProjectSensorTagging extends React.Component {
                 this.tags.push({
                     id: tags_id,
                     tag: tag.name,
-                    start_sec: tag.start_sec,
-                    end_sec: tag.end_sec,
+                    start_sec: Number(tag.start_sec),
+                    end_sec: Number(tag.end_sec),
                     tags_num: this.state.figures[this.state.currentMovie].chapters.length - 1,
                 })
 
                 this.newTags.push({
                     id: tags_id,
                     tag: tag.name,
-                    start_sec: tag.start_sec,
-                    end_sec: tag.end_sec,
+                    start_sec: Number(tag.start_sec),
+                    end_sec: Number(tag.end_sec),
                     tags_num: this.state.figures[this.state.currentMovie].chapters.length - 1,
                 })
 
-                var listtag = [tag.start_sec * 570 / duration, tag.end_sec * 570 / duration]
+                var listtag = [Number(tag.start_sec) * 570 / duration, Number(tag.end_sec * 570) / duration]
 
                 this.leftTagList.getWrappedInstance().appendTag(listtag, tag.name, tags_id)
                 this.rightTagList.getWrappedInstance().appendTag(listtag, tag.name, tags_id)
